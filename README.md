@@ -16,3 +16,22 @@ Many students struggle with DBMS, OS, CN, and OOPs — so this project provides 
 - Mobile-first design  
 
 ---
+
+## Subjects Covered
+
+### DBMS
+- ER Models  
+- Normalization  
+- SQL Queries  
+- Joins  
+- Indexing  
+- Transactions and ACID  
+- Keys and Constraints  
+
+### Operating Systems
+- Scheduling Algorithms  
+- Deadlock  
+- Paging and Segmentation  
+- Virtual Memory  
+- Semaphores  
+- File System Basics  
