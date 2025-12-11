@@ -35,3 +35,21 @@ Many students struggle with DBMS, OS, CN, and OOPs — so this project provides 
 - Virtual Memory  
 - Semaphores  
 - File System Basics  
+
+### Computer Networks
+- OSI vs TCP/IP  
+- DNS, DHCP  
+- Subnetting  
+- Routing Fundamentals  
+- HTTP vs HTTPS  
+- Congestion Control  
+
+### OOPs
+- Polymorphism  
+- Inheritance  
+- Abstraction  
+- Encapsulation  
+- Interfaces and Classes  
+- Real-world Examples  
+
+---
