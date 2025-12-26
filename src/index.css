@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+/* reading-friendly defaults */
+html {
+    font-family: Inter, system-ui, sans-serif;
+}

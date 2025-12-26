@@ -1,10 +1,13 @@
-import InterviewPrepSection from './components/InterviewPrepSection'
+import Navbar from "./components/Navbar";
+import SubjectPage from "./pages/SubjectPage";
 
-function App() {
+const App = () => {
   return (
-    <div>
+    <div className="bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <Navbar />
+      <SubjectPage />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
