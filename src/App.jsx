@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import SubjectPage from "./pages/SubjectPage";
 
 const App = () => {
-  const [activeSubject, setActiveSubject] = useState("DBMS");
+  // ✅ load subject from localStorage
+  const [activeSubject, setActiveSubject] = useState(() => {
+    return localStorage.getItem("activeSubject") || "DBMS";
+  });
 
   const [isDark, setIsDark] = useState(() => {
     if (localStorage.theme) {
@@ -12,6 +15,12 @@ const App = () => {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
 
+  // ✅ persist subject on change
+  useEffect(() => {
+    localStorage.setItem("activeSubject", activeSubject);
+  }, [activeSubject]);
+
+  // theme effect (already correct)
   useEffect(() => {
     const root = document.documentElement;
     if (isDark) {
