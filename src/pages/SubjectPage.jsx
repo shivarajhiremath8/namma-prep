@@ -11,7 +11,11 @@ const SubjectPage = ({ activeSubject }) => {
                 title={subject.title}
                 description={subject.description}
             />
-            <QuestionList questions={subject.data} />
+
+            <QuestionList
+                key={activeSubject}
+                questions={subject.data}
+            />
         </main>
     );
 };
