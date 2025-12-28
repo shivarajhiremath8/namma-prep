@@ -15,7 +15,7 @@ const Navbar = ({ activeSubject, setActiveSubject }) => {
             text-sm
             bg-white dark:bg-slate-900
             border border-slate-300 dark:border-slate-700
-            rounded-md px-2 py-1
+            rounded-md px-2 py-1.5
             text-slate-700 dark:text-slate-200
             focus:outline-none focus:ring-2 focus:ring-blue-500
         "
