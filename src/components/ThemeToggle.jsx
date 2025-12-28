@@ -1,47 +1,50 @@
 import { useEffect, useState } from "react";
+import darkIcon from "../assets/icons/dark.svg";
+import lightIcon from "../assets/icons/light.svg";
 
 const ThemeToggle = () => {
-    const [isDark, setIsDark] = useState(false);
-
-    // On first load: system preference OR saved preference
-    useEffect(() => {
-        const savedTheme = localStorage.getItem("theme");
-
-        if (savedTheme === "dark") {
-            document.documentElement.classList.add("dark");
-            setIsDark(true);
-        } else if (savedTheme === "light") {
-            document.documentElement.classList.remove("dark");
-            setIsDark(false);
-        } else {
-            // system preference
-            const prefersDark = window.matchMedia(
-                "(prefers-color-scheme: dark)"
-            ).matches;
-
-            document.documentElement.classList.toggle("dark", prefersDark);
-            setIsDark(prefersDark);
+    const [isDark, setIsDark] = useState(() => {
+        if (localStorage.theme) {
+            return localStorage.theme === "dark";
         }
-    }, []);
+        return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    });
 
-    const toggleTheme = () => {
-        const nextTheme = !isDark;
+    useEffect(() => {
+        const root = document.documentElement;
 
-        setIsDark(nextTheme);
-        document.documentElement.classList.toggle("dark", nextTheme);
-        localStorage.setItem("theme", nextTheme ? "dark" : "light");
-    };
+        if (isDark) {
+            root.classList.add("dark");
+            localStorage.theme = "dark";
+        } else {
+            root.classList.remove("dark");
+            localStorage.theme = "light";
+        }
+    }, [isDark]);
 
     return (
         <button
-            onClick={toggleTheme}
-            className="text-sm px-3 py-1.5 rounded-md border
-                 border-slate-200 dark:border-slate-700
-                 text-slate-700 dark:text-slate-300
-                 hover:bg-slate-100 dark:hover:bg-slate-800
-                 transition"
+            onClick={() => setIsDark(!isDark)}
+            className="
+        flex items-center gap-2
+        px-3 py-1.5
+        rounded-md
+        border border-slate-300 dark:border-slate-700
+        text-sm
+        text-slate-700 dark:text-slate-200
+        hover:bg-slate-100 dark:hover:bg-slate-800
+        transition
+    "
         >
-            {isDark ? "🌙 Dark" : "☀️ Light"}
+            <img
+                src={isDark ? lightIcon : darkIcon}
+                alt="Theme icon"
+                className="w-4 h-4"
+            />
+
+            <span className="hidden sm:inline">
+                {isDark ? "Light" : "Dark"}
+            </span>
         </button>
     );
 };
