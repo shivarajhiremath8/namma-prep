@@ -1,19 +1,41 @@
 import { useState } from "react";
+import { KEYWORDS } from "../data/keywords";
 
+/* ---------- Keyword Highlighter ---------- */
+const highlightKeywords = (text) => {
+    let result = text;
+
+    KEYWORDS.forEach((word) => {
+        const regex = new RegExp(`\\b(${word})\\b`, "gi");
+        result = result.replace(
+            regex,
+            `<span class="font-semibold text-blue-600 dark:text-blue-400">$1</span>`
+        );
+    });
+
+    return result;
+};
+
+/* ---------- Answer Formatter ---------- */
 const formatAnswer = (text) => {
-    // Case 1: Numbered points (1. 2. 3.)
+    // 1️⃣ Numbered points
     if (/\d+\./.test(text)) {
         const parts = text.split(/\d+\.\s*/).filter(Boolean);
         return (
             <ol className="list-decimal pl-5 space-y-1">
                 {parts.map((p, i) => (
-                    <li key={i}>{p}</li>
+                    <li
+                        key={i}
+                        dangerouslySetInnerHTML={{
+                            __html: highlightKeywords(p),
+                        }}
+                    />
                 ))}
             </ol>
         );
     }
 
-    // Case 2: Colon with comma-separated points
+    // 2️⃣ Colon + comma-separated points
     if (text.includes(":")) {
         const [intro, rest] = text.split(":");
         const points = rest.split(",").map((p) => p.trim());
@@ -21,10 +43,20 @@ const formatAnswer = (text) => {
         if (points.length > 1) {
             return (
                 <>
-                    <p className="mb-2">{intro}:</p>
+                    <p
+                        className="mb-2"
+                        dangerouslySetInnerHTML={{
+                            __html: highlightKeywords(intro + ":"),
+                        }}
+                    />
                     <ul className="list-disc pl-5 space-y-1">
                         {points.map((p, i) => (
-                            <li key={i}>{p}</li>
+                            <li
+                                key={i}
+                                dangerouslySetInnerHTML={{
+                                    __html: highlightKeywords(p),
+                                }}
+                            />
                         ))}
                     </ul>
                 </>
@@ -32,10 +64,17 @@ const formatAnswer = (text) => {
         }
     }
 
-    // Case 3: Normal paragraph
-    return <p>{text}</p>;
+    // 3️⃣ Normal paragraph
+    return (
+        <p
+            dangerouslySetInnerHTML={{
+                __html: highlightKeywords(text),
+            }}
+        />
+    );
 };
 
+/* ---------- Question Item ---------- */
 const QuestionItem = ({ question, answer }) => {
     const [open, setOpen] = useState(false);
 
@@ -48,7 +87,9 @@ const QuestionItem = ({ question, answer }) => {
                 <span className="text-sm font-medium text-slate-800 dark:text-slate-100">
                     {question}
                 </span>
-                <span className="text-lg text-slate-500">{open ? "−" : "+"}</span>
+                <span className="text-lg text-slate-500">
+                    {open ? "−" : "+"}
+                </span>
             </button>
 
             {open && (
