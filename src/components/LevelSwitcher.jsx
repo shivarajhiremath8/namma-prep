@@ -17,12 +17,37 @@ const LevelSwitcher = ({ level, setLevel }) => {
 
             {/* Pagination */}
             <div className="flex items-center justify-center gap-3 text-sm">
-                <button
-                    onClick={() => setLevel(Math.max(1, level - 1))}
-                    className="px-2 py-1 text-slate-500 hover:text-slate-800 dark:hover:text-white"
-                >
-                    ←
-                </button>
+                {/* Previous */}
+                <div className="relative group">
+                    <button
+                        onClick={() => setLevel(Math.max(1, level - 1))}
+                        className="px-2 py-1 text-slate-500 hover:text-slate-800 dark:hover:text-white"
+                    >
+                        ←
+                    </button>
+
+                    {/* Tooltip */}
+                    <span
+                        className="
+              absolute
+              -top-8
+              left-1/2
+              -translate-x-1/2
+              whitespace-nowrap
+              rounded-md
+              bg-slate-800
+              px-2 py-1
+              text-xs
+              text-white
+              opacity-0
+              group-hover:opacity-100
+              transition
+              pointer-events-none
+            "
+                    >
+                        Previous level
+                    </span>
+                </div>
 
                 {[1, 2, 3].map((l) => (
                     <button
@@ -38,12 +63,37 @@ const LevelSwitcher = ({ level, setLevel }) => {
                     </button>
                 ))}
 
-                <button
-                    onClick={() => setLevel(Math.min(3, level + 1))}
-                    className="px-2 py-1 text-slate-500 hover:text-slate-800 dark:hover:text-white"
-                >
-                    →
-                </button>
+                {/* Next */}
+                <div className="relative group">
+                    <button
+                        onClick={() => setLevel(Math.min(3, level + 1))}
+                        className="px-2 py-1 text-slate-500 hover:text-slate-800 dark:hover:text-white"
+                    >
+                        →
+                    </button>
+
+                    {/* Tooltip */}
+                    <span
+                        className="
+              absolute
+              -top-8
+              left-1/2
+              -translate-x-1/2
+              whitespace-nowrap
+              rounded-md
+              bg-slate-800
+              px-2 py-1
+              text-xs
+              text-white
+              opacity-0
+              group-hover:opacity-100
+              transition
+              pointer-events-none
+            "
+                    >
+                        Next level
+                    </span>
+                </div>
             </div>
         </div>
     );

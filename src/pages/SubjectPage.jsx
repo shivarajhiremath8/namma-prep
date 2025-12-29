@@ -1,58 +1,77 @@
-import { useState, useEffect } from "react";
-import SubjectHeader from "../components/SubjectHeader";
-import QuestionList from "../components/QuestionList";
+import { useEffect, useState } from "react";
 import LevelSwitcher from "../components/LevelSwitcher";
+import QuestionList from "../components/QuestionList";
 import SearchBar from "../components/SearchBar";
+import SubjectHeader from "../components/SubjectHeader";
 import { SUBJECTS } from "../data/subjects";
 
 const getInitialLevel = (subject) => {
-  const saved = localStorage.getItem(`level-${subject}`);
-  return saved ? Number(saved) : 1;
+    const saved = localStorage.getItem(`level-${subject}`);
+    return saved ? Number(saved) : 1;
 };
 
 const SubjectPage = ({ activeSubject }) => {
-  const [level, setLevel] = useState(() =>
-    getInitialLevel(activeSubject)
-  );
-  const [search, setSearch] = useState("");
+    const [level, setLevel] = useState(() =>
+        getInitialLevel(activeSubject)
+    );
+    const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    setLevel(getInitialLevel(activeSubject));
-    setSearch(""); // reset search on subject change
-  }, [activeSubject]);
+    // persist level
+    useEffect(() => {
+        localStorage.setItem(`level-${activeSubject}`, level);
+    }, [level, activeSubject]);
 
-  useEffect(() => {
-    localStorage.setItem(`level-${activeSubject}`, level);
-  }, [level, activeSubject]);
+    const subject = SUBJECTS[activeSubject];
 
-  const subject = SUBJECTS[activeSubject];
-  const allQuestions = subject.levels[level];
+    // 🔹 collect questions
+    const levelQuestions = subject.levels[level];
 
-  // 🔍 filter logic
-  const filteredQuestions = allQuestions.filter(
-    (q) =>
-      q.question.toLowerCase().includes(search.toLowerCase()) ||
-      q.answer.toLowerCase().includes(search.toLowerCase())
-  );
+    const allQuestions = Object.values(subject.levels).flat();
 
-  return (
-    <main>
-      <SubjectHeader
-        title={subject.title}
-        description={subject.description}
-      />
+    // 🔍 apply search
+    const questionsToShow = search
+        ? allQuestions.filter(
+            (q) =>
+                q.question.toLowerCase().includes(search.toLowerCase()) ||
+                q.answer.toLowerCase().includes(search.toLowerCase())
+        )
+        : levelQuestions;
 
-      <SearchBar value={search} onChange={setSearch} />
+    const noResults = search && questionsToShow.length === 0;
 
-      <QuestionList
-        key={`${activeSubject}-${level}`}
-        questions={filteredQuestions}
-        searchTerm={search}
-      />
+    return (
+        <main key={activeSubject}>
+            <SubjectHeader
+                title={subject.title}
+                description={subject.description}
+            />
 
-      <LevelSwitcher level={level} setLevel={setLevel} />
-    </main>
-  );
+            <SearchBar value={search} onChange={setSearch} />
+
+            {/* No Results UI */}
+            {noResults ? (
+                <div className="max-w-3xl mx-auto px-4 mt-8 text-center">
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                        No results found
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        Try a different keyword or check spelling
+                    </p>
+                </div>
+            ) : (
+                <QuestionList
+                    key={search ? "search-results" : `${activeSubject}-${level}`}
+                    questions={questionsToShow}
+                    searchTerm={search}
+                />
+            )}
+
+            {/* Pagination only when NOT searching and results exist */}
+            {!search && !noResults && (
+                <LevelSwitcher level={level} setLevel={setLevel} />
+            )}
+        </main>
+    );
 };
 
 export default SubjectPage;
