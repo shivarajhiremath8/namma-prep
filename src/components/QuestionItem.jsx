@@ -1,33 +1,63 @@
 import { useState } from "react";
 import { KEYWORDS } from "../data/keywords";
 
-/* ---------- Highlighter ---------- */
-const highlightText = (text, searchTerm) => {
+/* ---------- Utils ---------- */
+const escapeRegExp = (text) =>
+    text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/* ---------- Safe Search Highlighter ---------- */
+const highlightSearchSafely = (html, searchTerm) => {
+    if (!searchTerm) return html;
+
+    const escaped = escapeRegExp(searchTerm);
+    const regex = new RegExp(`(${escaped})`, "gi");
+
+    // split by HTML tags
+    const parts = html.split(/(<[^>]+>)/g);
+
+    return parts
+        .map((part) => {
+            // if it's an HTML tag, return as-is
+            if (part.startsWith("<")) return part;
+
+            // only highlight in text nodes
+            return part.replace(
+                regex,
+                `<span class="bg-yellow-200 dark:bg-yellow-700 px-0.5 rounded">$1</span>`
+            );
+        })
+        .join("");
+};
+
+/* ---------- Keyword Highlighter ---------- */
+const highlightKeywords = (text) => {
     let result = text;
 
-    // Highlight important keywords (blue)
     KEYWORDS.forEach((word) => {
-        const regex = new RegExp(`\\b(${word})\\b`, "gi");
+        const escapedWord = escapeRegExp(word);
+        const regex = new RegExp(`\\b(${escapedWord})\\b`, "gi");
+
         result = result.replace(
             regex,
             `<span class="font-semibold text-blue-600 dark:text-blue-400">$1</span>`
         );
     });
 
-    // Highlight search term (yellow)
-    if (searchTerm) {
-        const regex = new RegExp(`(${searchTerm})`, "gi");
-        result = result.replace(
-            regex,
-            `<span class="bg-yellow-200 dark:bg-yellow-700 px-0.5 rounded">$1</span>`
-        );
-    }
-
     return result;
+};
+
+/* ---------- Combined Highlighter ---------- */
+const highlightText = (text, searchTerm) => {
+    // 1️⃣ keyword highlight
+    const withKeywords = highlightKeywords(text);
+
+    // 2️⃣ safe search highlight (even for 1 letter)
+    return highlightSearchSafely(withKeywords, searchTerm);
 };
 
 /* ---------- Formatter ---------- */
 const formatAnswer = (text, searchTerm) => {
+    // Numbered list
     if (/\d+\./.test(text)) {
         const parts = text.split(/\d+\.\s*/).filter(Boolean);
         return (
@@ -44,6 +74,7 @@ const formatAnswer = (text, searchTerm) => {
         );
     }
 
+    // Colon + bullet list
     if (text.includes(":")) {
         const [intro, rest] = text.split(":");
         const points = rest.split(",").map((p) => p.trim());
@@ -72,6 +103,7 @@ const formatAnswer = (text, searchTerm) => {
         }
     }
 
+    // Paragraph
     return (
         <p
             dangerouslySetInnerHTML={{
