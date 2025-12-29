@@ -5,20 +5,17 @@ import os from "./os";
 export const SUBJECTS = {
     DBMS: {
         title: "DBMS Interview Questions",
-        description:
-            "Carefully curated DBMS questions to help you revise concepts and crack interviews.",
-        data: dbms,
+        description: "Carefully curated DBMS questions to help you revise concepts and crack interviews.",
+        levels: dbms,
     },
     OS: {
         title: "Operating Systems Interview Questions",
-        description:
-            "Core OS questions covering processes, memory, and scheduling concepts.",
-        data: os,
+        description: "Core OS questions covering fundamentals to advanced concepts.",
+        levels: os,
     },
     CN: {
         title: "Computer Networks Interview Questions",
-        description:
-            "Important networking questions explained in a simple and interview-focused way.",
-        data: cn,
+        description: "Important networking questions explained simply.",
+        levels: cn,
     },
 };
