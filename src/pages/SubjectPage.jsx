@@ -1,47 +1,58 @@
-import { useEffect, useState } from "react";
-import LevelSwitcher from "../components/LevelSwitcher";
-import QuestionList from "../components/QuestionList";
+import { useState, useEffect } from "react";
 import SubjectHeader from "../components/SubjectHeader";
+import QuestionList from "../components/QuestionList";
+import LevelSwitcher from "../components/LevelSwitcher";
+import SearchBar from "../components/SearchBar";
 import { SUBJECTS } from "../data/subjects";
 
 const getInitialLevel = (subject) => {
-    const saved = localStorage.getItem(`level-${subject}`);
-    return saved ? Number(saved) : 1;
+  const saved = localStorage.getItem(`level-${subject}`);
+  return saved ? Number(saved) : 1;
 };
 
 const SubjectPage = ({ activeSubject }) => {
-    const [level, setLevel] = useState(() =>
-        getInitialLevel(activeSubject)
-    );
+  const [level, setLevel] = useState(() =>
+    getInitialLevel(activeSubject)
+  );
+  const [search, setSearch] = useState("");
 
-    // update level when subject changes (NO effect body logic)
-    useEffect(() => {
-        setLevel(getInitialLevel(activeSubject));
-    }, [activeSubject]);
+  useEffect(() => {
+    setLevel(getInitialLevel(activeSubject));
+    setSearch(""); // reset search on subject change
+  }, [activeSubject]);
 
-    // persist level
-    useEffect(() => {
-        localStorage.setItem(`level-${activeSubject}`, level);
-    }, [level, activeSubject]);
+  useEffect(() => {
+    localStorage.setItem(`level-${activeSubject}`, level);
+  }, [level, activeSubject]);
 
-    const subject = SUBJECTS[activeSubject];
-    const questions = subject.levels[level];
+  const subject = SUBJECTS[activeSubject];
+  const allQuestions = subject.levels[level];
 
-    return (
-        <main>
-            <SubjectHeader
-                title={subject.title}
-                description={subject.description}
-            />
+  // 🔍 filter logic
+  const filteredQuestions = allQuestions.filter(
+    (q) =>
+      q.question.toLowerCase().includes(search.toLowerCase()) ||
+      q.answer.toLowerCase().includes(search.toLowerCase())
+  );
 
-            <QuestionList
-                key={`${activeSubject}-${level}`}
-                questions={questions}
-            />
+  return (
+    <main>
+      <SubjectHeader
+        title={subject.title}
+        description={subject.description}
+      />
 
-            <LevelSwitcher level={level} setLevel={setLevel} />
-        </main>
-    );
+      <SearchBar value={search} onChange={setSearch} />
+
+      <QuestionList
+        key={`${activeSubject}-${level}`}
+        questions={filteredQuestions}
+        searchTerm={search}
+      />
+
+      <LevelSwitcher level={level} setLevel={setLevel} />
+    </main>
+  );
 };
 
 export default SubjectPage;
