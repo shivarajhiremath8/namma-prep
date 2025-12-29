@@ -14,12 +14,12 @@ const SubjectPage = ({ activeSubject }) => {
         getInitialLevel(activeSubject)
     );
 
-    // 🔁 update level when subject changes (NO effect body logic)
+    // update level when subject changes (NO effect body logic)
     useEffect(() => {
         setLevel(getInitialLevel(activeSubject));
     }, [activeSubject]);
 
-    // 💾 persist level
+    // persist level
     useEffect(() => {
         localStorage.setItem(`level-${activeSubject}`, level);
     }, [level, activeSubject]);
