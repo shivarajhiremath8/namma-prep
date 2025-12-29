@@ -1,6 +1,8 @@
 const LevelSwitcher = ({ level, setLevel }) => {
     return (
-        <div className="flex items-center justify-center gap-3 mt-8 text-sm">
+        <div className="flex items-center justify-center gap-3 mt-8 pb-10 text-sm">
+            {/* ↑↑ added pb-10 for bottom padding */}
+
             <button
                 onClick={() => setLevel(Math.max(1, level - 1))}
                 className="px-2 py-1 text-slate-500 hover:text-slate-800 dark:hover:text-white"
