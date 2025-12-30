@@ -1,125 +1,82 @@
 import { useState } from "react";
-import { KEYWORDS } from "../data/keywords";
 import ConceptModal from "./ConceptModal";
+import RichText from "./RichText";
+import YouTubePlayer from "./YouTubePlayer";
 
-/* ---------- Utils ---------- */
-const escapeRegExp = (text) =>
-    text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-/* ---------- Safe Search Highlighter ---------- */
-const highlightSearchSafely = (html, searchTerm) => {
-    if (!searchTerm) return html;
-
-    const escaped = escapeRegExp(searchTerm);
-    const regex = new RegExp(`(${escaped})`, "gi");
-
-    const parts = html.split(/(<[^>]+>)/g);
-
-    return parts
-        .map((part) => {
-            if (part.startsWith("<")) return part;
-            return part.replace(
-                regex,
-                `<span class="bg-yellow-200 dark:bg-yellow-700 px-0.5 rounded">$1</span>`
-            );
-        })
-        .join("");
-};
-
-/* ---------- Keyword Highlighter (questions only) ---------- */
-const highlightKeywords = (text) => {
-    let result = text;
-
-    KEYWORDS.forEach((word) => {
-        const escapedWord = escapeRegExp(word);
-        const regex = new RegExp(`\\b(${escapedWord})\\b`, "gi");
-
-        result = result.replace(
-            regex,
-            `<span class="font-semibold text-blue-600 dark:text-blue-400">$1</span>`
-        );
-    });
-
-    return result;
-};
-
-/* ---------- Concept Renderer ---------- */
-const renderTextWithConcepts = (text, openConcept) => {
-    const parts = text.split(/\[(.*?)\]/g);
-
-    return parts.map((part, i) =>
-        i % 2 === 1 ? (
-            <button
-                key={i}
-                onClick={() => openConcept(part)}
-                className="text-blue-600 dark:text-blue-400 font-medium hover:underline"
-            >
-                {part}
-            </button>
-        ) : (
-            <span key={i}>{part}</span>
-        )
-    );
-};
-
-/* ---------- Formatter (answers) ---------- */
-const formatAnswer = (text, searchTerm, openConcept) => {
-    const safeText = highlightSearchSafely(text, searchTerm);
-    return <p>{renderTextWithConcepts(safeText, openConcept)}</p>;
-};
-
-/* ---------- Question Item ---------- */
 const QuestionItem = ({ question, answer, searchTerm }) => {
     const [open, setOpen] = useState(false);
     const [conceptStack, setConceptStack] = useState([]);
 
-    const pushConcept = (concept) =>
-        setConceptStack((s) => [...s, concept]);
+    const pushConcept = (concept) => {
+        setConceptStack((prev) => [...prev, concept]);
+    };
 
-    const popConcept = () =>
-        setConceptStack((s) => s.slice(0, -1));
+    const popConcept = () => {
+        setConceptStack((prev) => prev.slice(0, -1));
+    };
+
+    // Normalize answer shape
+    const answerText =
+        typeof answer === "string" ? answer : answer?.answer || "";
+
+    const videoUrl =
+        typeof answer === "object" ? answer?.video : null;
 
     return (
         <>
+            {/* Question Card */}
             <div className="border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900">
                 {/* Header */}
                 <button
-                    onClick={() => setOpen((o) => !o)}
+                    onClick={() => setOpen((prev) => !prev)}
                     className="w-full flex items-center justify-between px-4 py-3 text-left"
                 >
-                    <span
-                        className="text-sm font-medium text-slate-800 dark:text-slate-100"
-                        dangerouslySetInnerHTML={{
-                            __html: highlightSearchSafely(
-                                highlightKeywords(question),
-                                searchTerm
-                            ),
-                        }}
-                    />
+                    <span className="text-sm font-medium text-slate-800 dark:text-slate-100 leading-snug">
+                        <RichText
+                            text={question}
+                            searchTerm={searchTerm}
+                            onConceptClick={() => { }}
+                        />
+                    </span>
 
-                    {/* Plus → X animation */}
+                    {/* + → × animation */}
                     <span
                         className={`
-              text-lg text-slate-500
-              transition-transform duration-300 ease-in-out
-              ${open ? "rotate-45" : "rotate-0"}
-            `}
+                            text-lg text-slate-500
+                            transition-transform duration-300 ease-in-out
+                            ${open ? "rotate-45" : "rotate-0"}
+                        `}
                     >
                         +
                     </span>
                 </button>
 
-                {/* Smooth accordion */}
+                {/* Smooth Accordion */}
                 <div
                     className={`
-    grid transition-[grid-template-rows,opacity] duration-300 ease-in-out
-    ${open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}
-  `}
+                        grid transition-[grid-template-rows,opacity]
+                        duration-300 ease-in-out
+                        ${open
+                            ? "grid-rows-[1fr] opacity-100"
+                            : "grid-rows-[0fr] opacity-0"}
+                    `}
                     style={{ visibility: open ? "visible" : "hidden" }}
                 >
                     <div className="overflow-hidden">
-                        <div className="px-4 pb-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                            {formatAnswer(answer, searchTerm, pushConcept)}
+                        <div className="px-4 pb-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-5">
+                            {/* Answer Text */}
+                            <RichText
+                                text={answerText}
+                                searchTerm={searchTerm}
+                                onConceptClick={pushConcept}
+                            />
+
+                            {/* Optional YouTube Video */}
+                            {videoUrl && (
+                                <div className="pt-3 border-t border-slate-200 dark:border-slate-700">
+                                    <YouTubePlayer url={videoUrl} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

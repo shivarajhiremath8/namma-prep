@@ -23,18 +23,29 @@ const SubjectPage = ({ activeSubject }) => {
 
     const subject = SUBJECTS[activeSubject];
 
-    // 🔹 collect questions
     const levelQuestions = subject.levels[level];
-
     const allQuestions = Object.values(subject.levels).flat();
 
-    // 🔍 apply search
+    // 🔧 SAFE text extractor
+    const getAnswerText = (answer) => {
+        if (typeof answer === "string") return answer;
+        if (typeof answer === "object" && answer.answer)
+            return answer.answer;
+        return "";
+    };
+
+    // 🔍 apply search (SAFE)
     const questionsToShow = search
-        ? allQuestions.filter(
-            (q) =>
-                q.question.toLowerCase().includes(search.toLowerCase()) ||
-                q.answer.toLowerCase().includes(search.toLowerCase())
-        )
+        ? allQuestions.filter((q) => {
+            const questionText = q.question.toLowerCase();
+            const answerText = getAnswerText(q.answer).toLowerCase();
+            const term = search.toLowerCase();
+
+            return (
+                questionText.includes(term) ||
+                answerText.includes(term)
+            );
+        })
         : levelQuestions;
 
     const noResults = search && questionsToShow.length === 0;
@@ -60,13 +71,16 @@ const SubjectPage = ({ activeSubject }) => {
                 </div>
             ) : (
                 <QuestionList
-                    key={search ? "search-results" : `${activeSubject}-${level}`}
+                    key={
+                        search
+                            ? "search-results"
+                            : `${activeSubject}-${level}`
+                    }
                     questions={questionsToShow}
-                    searchTerm={search}
                 />
             )}
 
-            {/* Pagination only when NOT searching and results exist */}
+            {/* Pagination only when NOT searching */}
             {!search && !noResults && (
                 <LevelSwitcher level={level} setLevel={setLevel} />
             )}
