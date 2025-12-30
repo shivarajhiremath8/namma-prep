@@ -71,12 +71,9 @@ const SubjectPage = ({ activeSubject }) => {
                 </div>
             ) : (
                 <QuestionList
-                    key={
-                        search
-                            ? "search-results"
-                            : `${activeSubject}-${level}`
-                    }
+                    key={search ? "search-results" : `${activeSubject}-${level}`}
                     questions={questionsToShow}
+                    searchTerm={search}
                 />
             )}
 

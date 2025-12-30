@@ -63,7 +63,7 @@ const QuestionItem = ({ question, answer, searchTerm }) => {
                     style={{ visibility: open ? "visible" : "hidden" }}
                 >
                     <div className="overflow-hidden">
-                        <div className="px-4 pb-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-5">
+                        <div className="px-4 pb-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                             {/* Answer Text */}
                             <RichText
                                 text={answerText}
@@ -73,7 +73,7 @@ const QuestionItem = ({ question, answer, searchTerm }) => {
 
                             {/* Optional YouTube Video */}
                             {videoUrl && (
-                                <div className="pt-3 border-t border-slate-200 dark:border-slate-700">
+                                <div className="my-5 pt-5 border-t border-slate-200 dark:border-slate-700">
                                     <YouTubePlayer url={videoUrl} />
                                 </div>
                             )}
