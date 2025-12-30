@@ -55,12 +55,14 @@ const dbms = {
         {
             id: 11,
             question: "Explain the various Keys in DBMS.",
-            answer: "Super Key (uniquely identifies tuples), Candidate Key (minimal super key), Primary Key (selected unique identifier, NOT NULL), Foreign Key (links to another table's primary key), and Composite Key (multi-attribute primary key)."
+            answer:
+                "Super Key, Candidate Key, [Primary Key], [Foreign Key], and Composite Key are different types of keys used to uniquely identify records and establish relationships between tables.",
         },
         {
             id: 12,
             question: "What is a Foreign Key and its purpose?",
-            answer: "A Foreign Key is an attribute in one table that references the Primary Key of another. It maintains referential integrity and establishes links between tables."
+            answer:
+                "A [Foreign Key] is an attribute in one table that references the [Primary Key] of another table. It maintains referential integrity and establishes links between tables.",
         },
         {
             id: 13,

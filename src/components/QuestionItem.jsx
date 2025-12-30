@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { KEYWORDS } from "../data/keywords";
+import ConceptModal from "./ConceptModal";
 
 /* ---------- Utils ---------- */
 const escapeRegExp = (text) =>
@@ -25,7 +26,7 @@ const highlightSearchSafely = (html, searchTerm) => {
         .join("");
 };
 
-/* ---------- Keyword Highlighter ---------- */
+/* ---------- Keyword Highlighter (questions only) ---------- */
 const highlightKeywords = (text) => {
     let result = text;
 
@@ -42,111 +43,95 @@ const highlightKeywords = (text) => {
     return result;
 };
 
-/* ---------- Combined Highlighter ---------- */
-const highlightText = (text, searchTerm) => {
-    const withKeywords = highlightKeywords(text);
-    return highlightSearchSafely(withKeywords, searchTerm);
+/* ---------- Concept Renderer ---------- */
+const renderTextWithConcepts = (text, openConcept) => {
+    const parts = text.split(/\[(.*?)\]/g);
+
+    return parts.map((part, i) =>
+        i % 2 === 1 ? (
+            <button
+                key={i}
+                onClick={() => openConcept(part)}
+                className="text-blue-600 dark:text-blue-400 font-medium hover:underline"
+            >
+                {part}
+            </button>
+        ) : (
+            <span key={i}>{part}</span>
+        )
+    );
 };
 
-/* ---------- Formatter ---------- */
-const formatAnswer = (text, searchTerm) => {
-    if (/\d+\./.test(text)) {
-        const parts = text.split(/\d+\.\s*/).filter(Boolean);
-        return (
-            <ol className="list-decimal pl-5 space-y-1">
-                {parts.map((p, i) => (
-                    <li
-                        key={i}
-                        dangerouslySetInnerHTML={{
-                            __html: highlightText(p, searchTerm),
-                        }}
-                    />
-                ))}
-            </ol>
-        );
-    }
-
-    if (text.includes(":")) {
-        const [intro, rest] = text.split(":");
-        const points = rest.split(",").map((p) => p.trim());
-
-        if (points.length > 1) {
-            return (
-                <>
-                    <p
-                        className="mb-2"
-                        dangerouslySetInnerHTML={{
-                            __html: highlightText(intro + ":", searchTerm),
-                        }}
-                    />
-                    <ul className="list-disc pl-5 space-y-1">
-                        {points.map((p, i) => (
-                            <li
-                                key={i}
-                                dangerouslySetInnerHTML={{
-                                    __html: highlightText(p, searchTerm),
-                                }}
-                            />
-                        ))}
-                    </ul>
-                </>
-            );
-        }
-    }
-
-    return (
-        <p
-            dangerouslySetInnerHTML={{
-                __html: highlightText(text, searchTerm),
-            }}
-        />
-    );
+/* ---------- Formatter (answers) ---------- */
+const formatAnswer = (text, searchTerm, openConcept) => {
+    const safeText = highlightSearchSafely(text, searchTerm);
+    return <p>{renderTextWithConcepts(safeText, openConcept)}</p>;
 };
 
 /* ---------- Question Item ---------- */
 const QuestionItem = ({ question, answer, searchTerm }) => {
     const [open, setOpen] = useState(false);
+    const [conceptStack, setConceptStack] = useState([]);
+
+    const pushConcept = (concept) =>
+        setConceptStack((s) => [...s, concept]);
+
+    const popConcept = () =>
+        setConceptStack((s) => s.slice(0, -1));
 
     return (
-        <div className="border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900">
-            {/* Header */}
-            <button
-                onClick={() => setOpen((o) => !o)}
-                className="w-full flex items-center justify-between px-4 py-3 text-left"
-            >
-                <span
-                    className="text-sm font-medium text-slate-800 dark:text-slate-100"
-                    dangerouslySetInnerHTML={{
-                        __html: highlightText(question, searchTerm),
-                    }}
-                />
-
-                {/* Plus → X animation */}
-                <span
-                    className={`
-            text-lg text-slate-500
-            transition-transform duration-300 ease-in-out
-            ${open ? "rotate-45" : "rotate-0"}
-          `}
+        <>
+            <div className="border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900">
+                {/* Header */}
+                <button
+                    onClick={() => setOpen((o) => !o)}
+                    className="w-full flex items-center justify-between px-4 py-3 text-left"
                 >
-                    +
-                </span>
-            </button>
+                    <span
+                        className="text-sm font-medium text-slate-800 dark:text-slate-100"
+                        dangerouslySetInnerHTML={{
+                            __html: highlightSearchSafely(
+                                highlightKeywords(question),
+                                searchTerm
+                            ),
+                        }}
+                    />
 
-            {/* Smooth accordion */}
-            <div
-                className={`
-          grid transition-[grid-template-rows] duration-300 ease-in-out
-          ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}
-        `}
-            >
-                <div className="overflow-hidden">
-                    <div className="px-4 pb-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                        {formatAnswer(answer, searchTerm)}
+                    {/* Plus → X animation */}
+                    <span
+                        className={`
+              text-lg text-slate-500
+              transition-transform duration-300 ease-in-out
+              ${open ? "rotate-45" : "rotate-0"}
+            `}
+                    >
+                        +
+                    </span>
+                </button>
+
+                {/* Smooth accordion */}
+                <div
+                    className={`
+    grid transition-[grid-template-rows,opacity] duration-300 ease-in-out
+    ${open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}
+  `}
+                    style={{ visibility: open ? "visible" : "hidden" }}
+                >
+                    <div className="overflow-hidden">
+                        <div className="px-4 pb-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                            {formatAnswer(answer, searchTerm, pushConcept)}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            {/* Concept Modal Stack */}
+            <ConceptModal
+                stack={conceptStack}
+                pushConcept={pushConcept}
+                popConcept={popConcept}
+            />
+        </>
     );
 };
 
