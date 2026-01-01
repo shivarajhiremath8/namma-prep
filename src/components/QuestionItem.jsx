@@ -7,26 +7,19 @@ const escapeRegExp = (text) =>
     text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /* ---------- Safe Search Highlighter ---------- */
-const highlightSearchSafely = (html, searchTerm) => {
-    if (!searchTerm) return html;
+const highlightSearchSafely = (text, searchTerm) => {
+    if (!searchTerm) return text;
 
     const escaped = escapeRegExp(searchTerm);
     const regex = new RegExp(`(${escaped})`, "gi");
 
-    const parts = html.split(/(<[^>]+>)/g);
-
-    return parts
-        .map((part) => {
-            if (part.startsWith("<")) return part;
-            return part.replace(
-                regex,
-                `<span class="bg-yellow-200 dark:bg-yellow-700 px-0.5 rounded">$1</span>`
-            );
-        })
-        .join("");
+    return text.replace(
+        regex,
+        `<span class="bg-yellow-200 dark:bg-yellow-700 px-0.5 rounded">$1</span>`
+    );
 };
 
-/* ---------- Keyword Highlighter (questions only) ---------- */
+/* ---------- Keyword Highlighter (visual only) ---------- */
 const highlightKeywords = (text) => {
     let result = text;
 
@@ -43,7 +36,7 @@ const highlightKeywords = (text) => {
     return result;
 };
 
-/* ---------- Concept Renderer ---------- */
+/* ---------- Concept Renderer (semantic) ---------- */
 const renderTextWithConcepts = (text, openConcept) => {
     const parts = text.split(/\[(.*?)\]/g);
 
@@ -62,10 +55,10 @@ const renderTextWithConcepts = (text, openConcept) => {
     );
 };
 
-/* ---------- Formatter (answers) ---------- */
+/* ---------- Answer Formatter ---------- */
 const formatAnswer = (text, searchTerm, openConcept) => {
-    const safeText = highlightSearchSafely(text, searchTerm);
-    return <p>{renderTextWithConcepts(safeText, openConcept)}</p>;
+    const withSearch = highlightSearchSafely(text, searchTerm);
+    return <p>{renderTextWithConcepts(withSearch, openConcept)}</p>;
 };
 
 /* ---------- Question Item ---------- */
@@ -97,24 +90,27 @@ const QuestionItem = ({ question, answer, searchTerm }) => {
                         }}
                     />
 
-                    {/* Plus → X animation */}
+                    {/* + → × */}
                     <span
                         className={`
-              text-lg text-slate-500
-              transition-transform duration-300 ease-in-out
-              ${open ? "rotate-45" : "rotate-0"}
-            `}
+                            text-lg text-slate-500
+                            transition-transform duration-300
+                            ${open ? "rotate-45" : ""}
+                        `}
                     >
                         +
                     </span>
                 </button>
 
-                {/* Smooth accordion */}
+                {/* Accordion */}
                 <div
                     className={`
-    grid transition-[grid-template-rows,opacity] duration-300 ease-in-out
-    ${open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}
-  `}
+                        grid transition-[grid-template-rows,opacity]
+                        duration-300 ease-in-out
+                        ${open
+                            ? "grid-rows-[1fr] opacity-100"
+                            : "grid-rows-[0fr] opacity-0"}
+                    `}
                     style={{ visibility: open ? "visible" : "hidden" }}
                 >
                     <div className="overflow-hidden">
@@ -125,7 +121,7 @@ const QuestionItem = ({ question, answer, searchTerm }) => {
                 </div>
             </div>
 
-            {/* Concept Modal Stack */}
+            {/* Concept Stack Modal */}
             <ConceptModal
                 stack={conceptStack}
                 pushConcept={pushConcept}

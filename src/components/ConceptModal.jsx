@@ -1,12 +1,15 @@
 import { CONCEPTS } from "../data/conceptRegistry";
 
-const ConceptModal = ({ stack, popConcept, pushConcept }) => {
+const ConceptModal = ({ stack, pushConcept, popConcept }) => {
     if (stack.length === 0) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Overlay + Blur */}
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            {/* Overlay */}
+            <div
+                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                onClick={popConcept}
+            />
 
             {stack.map((concept, index) => {
                 const data = CONCEPTS[concept];
@@ -18,14 +21,14 @@ const ConceptModal = ({ stack, popConcept, pushConcept }) => {
                     <div
                         key={index}
                         className={`
-              absolute
-              w-[90%] max-w-md
-              rounded-xl
-              bg-white dark:bg-slate-900
-              shadow-xl
-              transition-all
-              ${isTop ? "scale-100 opacity-100" : "scale-95 opacity-70"}
-            `}
+                            absolute
+                            w-[90%] max-w-md
+                            rounded-xl
+                            bg-white dark:bg-slate-900
+                            shadow-xl
+                            transition-all
+                            ${isTop ? "opacity-100 scale-100" : "opacity-70 scale-95"}
+                        `}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
@@ -51,24 +54,23 @@ const ConceptModal = ({ stack, popConcept, pushConcept }) => {
     );
 };
 
-export default ConceptModal;
-
-/* ---------- Helper ---------- */
+/* ---------- Recursive Concept Renderer ---------- */
 const renderConceptText = (text, pushConcept) => {
     const parts = text.split(/\[(.*?)\]/g);
 
-    return parts.map((part, i) => {
-        if (i % 2 === 1) {
-            return (
-                <button
-                    key={i}
-                    onClick={() => pushConcept(part)}
-                    className="text-blue-600 dark:text-blue-400 font-medium hover:underline"
-                >
-                    {part}
-                </button>
-            );
-        }
-        return <span key={i}>{part}</span>;
-    });
+    return parts.map((part, i) =>
+        i % 2 === 1 ? (
+            <button
+                key={i}
+                onClick={() => pushConcept(part)}
+                className="text-blue-600 dark:text-blue-400 font-medium hover:underline"
+            >
+                {part}
+            </button>
+        ) : (
+            <span key={i}>{part}</span>
+        )
+    );
 };
+
+export default ConceptModal;
